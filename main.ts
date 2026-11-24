@@ -47,6 +47,16 @@ if (ENTRY_LINE !== ENTRY_LINE.trim() || !ENTRY_LINE.endsWith(".")) {
   throw new Error("entry must be trimmed and end with a full stop");
 }
 
+// Third guard: one sentence only, and no control characters that would
+// corrupt a one-line read — a second sentence or a stray control byte
+// would change what the judge compares.
+if ((ENTRY_LINE.match(/\./g) ?? []).length !== 1) {
+  throw new Error("entry must be exactly one sentence");
+}
+if (/[\u0000-\u001f\u007f]/.test(ENTRY_LINE)) {
+  throw new Error("entry must contain no control characters");
+}
+
 const outputDir = process.env.OUTPUT_DIR ?? "/output";
 mkdirSync(outputDir, { recursive: true });
 writeFileSync(join(outputDir, "entry.txt"), ENTRY_LINE, "utf8");
